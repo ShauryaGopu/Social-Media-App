@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="favicon.png" rel="icon" type="image/png">
+    <link href="{% static 'favicon.png' %}" rel="icon" type="image/png">
     <title>Home</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -830,9 +830,9 @@
     <script src="{% static 'assets/js/uikit.js' %}"></script>
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
+    <script src="{% static 'assets/js/ionicons.js' %}"></script>
 
-
-    <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
+    {% comment %} https://unpkg.com/ionicons@6.0.4/dist/ionicons.js {% endcomment %}
 </body>
 
 
