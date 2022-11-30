@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 
 @login_required(login_url='signin')
 def index(request):
@@ -26,17 +27,21 @@ def signup(request):
                 messages.info(request,'Username Taken')
                 return redirect('signup')
             else:
-                user = User.objects.create(username=username, email=email, password=password)
+                user = User.objects.create(username=username, email=email, password=make_password(password))
                 user.save()
 
 
                 # log user in and redirect to settings pageY
+
+                user_login = auth.authenticate(username=username, password=password)
+                auth.login(request, user_login)
             
                 #create profile object for the new user
                 user_model  = User.objects.get(username=username)
                 new_profile = Profile.objects.create(user=user_model, id_user = user_model.id)
                 new_profile.save()
-                return redirect('signin')
+
+                return redirect('settings')
         else:
             messages.info(request,'Password Not Matching')
             return redirect('signup')
@@ -65,3 +70,11 @@ def signin(request):
 def logout(request):
     auth.logout(request)
     return redirect('signin')
+
+@login_required(login_url='signin')
+def settings(request):
+    user_profile = Profile.objects.get(user=request.user)
+    print(user_profile)
+    # return render(request,'setting.html')
+
+    return render(request, 'setting.html',{'user_profile':user_profile})
