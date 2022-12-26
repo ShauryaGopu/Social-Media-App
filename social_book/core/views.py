@@ -12,6 +12,13 @@ def index(request):
     return render(request, 'index.html')
 
 # Create your views here
+@login_required(login_url='signin')
+def upload(request):
+    return HttpResponse('<h1>Upload view</h1>')
+
+
+
+
 
 def signup(request):
     if request.method == 'POST':
@@ -66,6 +73,8 @@ def signin(request):
     else:
         return render(request, 'signin.html')
 
+
+
 @login_required(login_url='signin')
 def logout(request):
     auth.logout(request)
@@ -74,7 +83,22 @@ def logout(request):
 @login_required(login_url='signin')
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
-    print(user_profile)
-    # return render(request,'setting.html')
+    if request.method == 'POST':
+        if request.FILES.get('image') == None:
+            image = user_profile.profileimg
+        else:
+            image = request.FILES.get('image')
 
+        bio =  request.POST['bio']
+        location = request.POST['location']
+
+        user_profile.profileimg =image
+        user_profile.bio = bio
+        user_profile.location = location
+        user_profile.save()    
+        
+        return redirect('settings')
+
+    #print(user_profile)
+    # return render(request,'setting.html')
     return render(request, 'setting.html',{'user_profile':user_profile})
