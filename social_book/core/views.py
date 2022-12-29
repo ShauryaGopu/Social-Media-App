@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.models import User, auth
-from .models import Profile
+from .models import Profile, Post
 from django.http import HttpResponse
 from django.contrib import messages
 
@@ -11,12 +11,24 @@ from django.contrib.auth.hashers import make_password
 def index(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
-    return render(request, 'index.html',{'user_profile':user_profile})
+
+    posts = Post.objects.all()
+
+    return render(request, 'index.html',{'user_profile':user_profile, 'posts':posts})
 
 # Create your views here
 @login_required(login_url='signin')
 def upload(request):
-    return HttpResponse('<h1>Upload view</h1>')
+    if request.method == 'POST':
+        user = request.user.username
+        image = request.FILES.get('image_upload')
+        caption = request.POST['caption']
+
+        new_post = Post.objects.create(user=user, image=image, caption=caption)
+        new_post.save()
+        return redirect('/')
+    else:
+        return redirect('/')
 
 
 
