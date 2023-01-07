@@ -6,6 +6,7 @@ from django.contrib import messages
 from itertools import chain
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
+import random
 
 @login_required(login_url='signin')
 def index(request):
@@ -23,8 +24,36 @@ def index(request):
         feed.append(Post.objects.filter(user=usernam))
 
     posts = list(chain(*feed))
+    
+    #profiles = Profile.objects.exclude(user = user_object)
 
-    return render(request, 'index.html',{'user_profile':user_profile, 'posts':posts})
+    #user suggestion starts here
+    all_users = User.objects.all()
+    user_following_all = []
+    for user in followings:
+        user_list = User.objects.get(username=user)
+        user_following_all.append(user_list)
+
+    suggestions_list = [x for x in list(all_users) if (x not in list(user_following_all))]
+
+    current_user = User.objects.filter(username=request.user.username)
+
+    final_suggestions = [x for x in list(suggestions_list) if (x not in list(current_user))]
+    random.shuffle(final_suggestions)
+
+    username_profile  = []
+    profiles = []
+    
+    for user in final_suggestions:
+        username_profile.append(user.id)
+
+    for id in username_profile:
+        profile_lists = Profile.objects.filter(id_user = id)
+        profiles.append(profile_lists)
+    
+    profiles = list(chain(*profiles))
+
+    return render(request, 'index.html',{'user_profile':user_profile, 'posts':posts , 'profiles':profiles[:4]})
 
 # Create your views here
 @login_required(login_url='signin')
@@ -40,6 +69,28 @@ def upload(request):
     else:
         return redirect('/')
 
+
+@login_required(login_url='signin')
+def search(request):
+
+    user_object =  User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    if request.method == 'POST':
+        username = request.POST['username']
+        username_object = User.objects.filter(username__icontains=username)
+
+        username_profile = []
+        username_profile_list = []
+
+        for users in username_object:
+            username_profile.append(users.id)
+        for id in username_profile:
+            username_profile_list.append(Profile.objects.filter(id_user=id))
+        
+        username_profile_list = list(chain(*username_profile_list))
+
+        return render(request, 'search.html',{'user_profile':user_profile, 'username_profile_list':username_profile_list})
+    
 
 @login_required(login_url='signin')
 def like_post(request):
